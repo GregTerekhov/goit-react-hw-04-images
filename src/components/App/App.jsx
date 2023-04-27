@@ -13,7 +13,7 @@ import { AppContainer, ModalImage } from './App.styled';
 export const App = () => {
   const [searchQuery, setQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [hits, setHits] = useState([]);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalImages, setTotalImages] = useState(0);
   const [largeImageURL, setURL] = useState('');
@@ -25,21 +25,20 @@ export const App = () => {
       isFirstRender.current = false;
       return;
     }
-    if (searchQuery.trim() === '') {
-      toast.error('Enter a valid query', toastConfig);
-      return;
-    }
-    setLoading(true);
     getImages(searchQuery, page)
       .then(({ newHits, totalHits }) => {
         if (newHits.length === 0) {
           toast.error('Enter a valid query', toastConfig);
           return;
         }
-        if (newHits.length < 12 || (hits.length !== 0 && newHits.length < 12)) {
+        if (
+          newHits.length < 12 ||
+          (newHits.length !== 0 && newHits.length < 12)
+        ) {
           toast.info('No more images', toastConfig);
         }
-        setHits(prevHits => [...prevHits, ...newHits]);
+
+        setImages(prevHits => [...prevHits, ...newHits]);
         setTotalImages(totalHits);
       })
       .catch(error => {
@@ -48,12 +47,12 @@ export const App = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [hits.length, page, searchQuery]);
+  }, [searchQuery, page, images.length]);
 
   const handleSearchFormSubmit = searchValue => {
     setQuery(searchValue);
     setPage(1);
-    setHits([]);
+    setImages([]);
     setTotalImages(0);
   };
 
@@ -61,12 +60,12 @@ export const App = () => {
     setPage(prevPage => prevPage + 1);
   };
 
-  const showLoadMoreBtn = !loading && hits.length !== totalImages;
+  const showLoadMoreBtn = !loading && images.length !== totalImages;
   return (
     <AppContainer>
       <Searchbar onSearchSubmit={handleSearchFormSubmit} />
-      {hits.length > 0 && (
-        <ImageGallery images={hits} handleImageClick={() => setURL('')} />
+      {images.length > 0 && (
+        <ImageGallery images={images} handleImageClick={() => setURL('')} />
       )}
       {showLoadMoreBtn && (
         <Button onClick={handleLoadMore} disabled={loading} />
