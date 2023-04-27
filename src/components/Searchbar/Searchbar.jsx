@@ -23,8 +23,8 @@ export const Searchbar = ({ onSearchSubmit }) => {
   };
 
   return (
-    <Header onSubmit={handleSubmit}>
-      <SearchForm>
+    <Header>
+      <SearchForm onSubmit={handleSubmit}>
         <SearchButton type="submit">
           <FiSearch style={{ width: 20, height: 20 }} />
           <SearchButtonLabel>Search</SearchButtonLabel>

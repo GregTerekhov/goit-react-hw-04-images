@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { Modal } from 'components/Modal/Modal';
 import { Searchbar } from 'components/Searchbar/Searchbar';
@@ -18,24 +18,28 @@ export const App = () => {
   const [totalImages, setTotalImages] = useState(0);
   const [largeImageURL, setURL] = useState('');
 
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (searchQuery.trim() === '') {
+      toast.error('Enter a valid query', toastConfig);
       return;
     }
     setLoading(true);
     getImages(searchQuery, page)
       .then(({ newHits, totalHits }) => {
-        if (searchQuery.trim() === '' || totalImages === 0) {
+        if (newHits.length === 0) {
           toast.error('Enter a valid query', toastConfig);
           return;
         }
-        // if (
-        //   newHits.length === totalImages ||
-        //   (prevState.hits.length !== 0 && newHits.length < 12)
-        // ) {
-        //   toast.info('No more images', toastConfig);
-        // }
-        setHits([...hits, ...newHits]);
+        if (newHits.length < 12 || (hits.length !== 0 && newHits.length < 12)) {
+          toast.info('No more images', toastConfig);
+        }
+        setHits(prevHits => [...prevHits, ...newHits]);
         setTotalImages(totalHits);
       })
       .catch(error => {
@@ -44,7 +48,7 @@ export const App = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [hits, hits.length, page, searchQuery, totalImages]);
+  }, [hits.length, page, searchQuery]);
 
   const handleSearchFormSubmit = searchValue => {
     setQuery(searchValue);
@@ -54,11 +58,7 @@ export const App = () => {
   };
 
   const handleLoadMore = () => {
-    setPage(prevState => prevState.page + 1);
-  };
-
-  const toggleModal = () => {
-    setURL('');
+    setPage(prevPage => prevPage + 1);
   };
 
   const showLoadMoreBtn = !loading && hits.length !== totalImages;
@@ -66,14 +66,14 @@ export const App = () => {
     <AppContainer>
       <Searchbar onSearchSubmit={handleSearchFormSubmit} />
       {hits.length > 0 && (
-        <ImageGallery images={hits} handleImageClick={toggleModal} />
+        <ImageGallery images={hits} handleImageClick={() => setURL('')} />
       )}
       {showLoadMoreBtn && (
         <Button onClick={handleLoadMore} disabled={loading} />
       )}
       {loading && <Loader />}
       {largeImageURL && (
-        <Modal onClose={toggleModal}>
+        <Modal onClose={() => setURL('')}>
           <ModalImage src={largeImageURL} />
         </Modal>
       )}
