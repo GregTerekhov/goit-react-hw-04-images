@@ -26,7 +26,8 @@ export const App = () => {
       return;
     }
     getImages(searchQuery, page)
-      .then(({ newHits, totalHits }) => {
+      .then(({ hits, totalHits }) => {
+        const newHits = hits;
         if (newHits.length === 0) {
           toast.error('Enter a valid query', toastConfig);
           return;
@@ -47,7 +48,7 @@ export const App = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [searchQuery, page, images.length]);
+  }, [searchQuery, page]);
 
   const handleSearchFormSubmit = searchValue => {
     setQuery(searchValue);
