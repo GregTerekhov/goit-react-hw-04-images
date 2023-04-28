@@ -33,12 +33,8 @@ export const App = () => {
         setImages(prevHits => [...prevHits, ...hits]);
         setTotalImages(totalHits);
       })
-      .catch(error => {
-        console.error(error.response);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(error => console.error(error.response))
+      .finally(() => setLoading(false));
   }, [searchQuery, page]);
 
   const handleSearchFormSubmit = searchValue => {
@@ -48,13 +44,9 @@ export const App = () => {
     setTotalImages(0);
   };
 
-  const handleLoadMore = () => {
-    setPage(prevPage => prevPage + 1);
-  };
+  const handleLoadMore = () => setPage(prevPage => prevPage + 1);
 
-  const toggleModal = (url = '') => {
-    setLargeImageURL(url);
-  };
+  const toggleModal = (url = '') => setLargeImageURL(url);
 
   const showLoadMoreBtn = !loading && images.length !== totalImages;
   return (

@@ -14,9 +14,8 @@ import {
 export const Searchbar = ({ onSearchSubmit }) => {
   const [searchValue, setValue] = useState('');
 
-  const handleQueryChange = event => {
+  const handleQueryChange = event =>
     setValue(event.currentTarget.value.toLowerCase());
-  };
 
   const handleSubmit = event => {
     event.preventDefault();
