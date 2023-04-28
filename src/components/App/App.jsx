@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { Modal } from 'components/Modal/Modal';
 import { Searchbar } from 'components/Searchbar/Searchbar';
@@ -16,30 +16,21 @@ export const App = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalImages, setTotalImages] = useState(0);
-  const [largeImageURL, setURL] = useState('');
-
-  const isFirstRender = useRef(true);
+  const [largeImageURL, setLargeImageURL] = useState('');
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+    if (!searchQuery) return;
     getImages(searchQuery, page)
       .then(({ hits, totalHits }) => {
-        const newHits = hits;
-        if (newHits.length === 0) {
+        if (hits.length === 0) {
           toast.error('Enter a valid query', toastConfig);
           return;
         }
-        if (
-          newHits.length < 12 ||
-          (newHits.length !== 0 && newHits.length < 12)
-        ) {
+        if (hits.length < 12 || (hits.length !== 0 && hits.length < 12)) {
           toast.info('No more images', toastConfig);
         }
 
-        setImages(prevHits => [...prevHits, ...newHits]);
+        setImages(prevHits => [...prevHits, ...hits]);
         setTotalImages(totalHits);
       })
       .catch(error => {
@@ -61,19 +52,23 @@ export const App = () => {
     setPage(prevPage => prevPage + 1);
   };
 
+  const toggleModal = (url = '') => {
+    setLargeImageURL(url);
+  };
+
   const showLoadMoreBtn = !loading && images.length !== totalImages;
   return (
     <AppContainer>
       <Searchbar onSearchSubmit={handleSearchFormSubmit} />
       {images.length > 0 && (
-        <ImageGallery images={images} handleImageClick={() => setURL('')} />
+        <ImageGallery images={images} handleImageClick={toggleModal} />
       )}
       {showLoadMoreBtn && (
         <Button onClick={handleLoadMore} disabled={loading} />
       )}
       {loading && <Loader />}
       {largeImageURL && (
-        <Modal onClose={() => setURL('')}>
+        <Modal onClose={toggleModal}>
           <ModalImage src={largeImageURL} />
         </Modal>
       )}
